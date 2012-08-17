@@ -3,7 +3,7 @@ SRCDIR=src
 BINDIR=bin
 RELATORIODIR=doc
 
-EXEC=ep1
+EXEC=ep3
 
 OBJECTS = $(BINDIR)/graph.o $(BINDIR)/utils.o $(BINDIR)/main.o
 CC = g++
