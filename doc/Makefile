@@ -1,7 +1,7 @@
 PDFC=pdflatex
 RELATORIONAME=relatorio
 
-AUXILIARTEX=base_redes.tex
+AUXILIARTEX=texbase.tex
 
 hell:
 	$(PDFC) $(RELATORIONAME).tex
