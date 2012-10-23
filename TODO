@@ -1,1 +1,9 @@
-TO DO
+
+Descrição sucinta (e põe sucinta nisso) do EP
+
+Implementar 2 algoritmos de roteamento.
+ -> link state (estado de enlace)
+ -> Vetor de distâncias
+
+* imprimir todas as trocas de mensagens entre roteadores
+* fazer o promptzinho

@@ -1,0 +1,2 @@
+MAKEOBJ=Make.objects
+MAKEDEP=Make.dependencies

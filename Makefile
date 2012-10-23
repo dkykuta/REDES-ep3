@@ -1,25 +1,31 @@
-CFLAGS = -Wall -ansi -pedantic -g -lpthread
+CFLAGS = -Wall -ansi -pedantic -g -pthread -lpthread -D_GNU_SOURCE
 SRCDIR=src
 BINDIR=bin
 RELATORIODIR=doc
 
-EXEC=ep3
+EXEC=ep2
 
-OBJECTS = $(BINDIR)/graph.o $(BINDIR)/utils.o $(BINDIR)/main.o
+EXEC_CLIENT=$(EXEC)_client
+EXEC_SERVER=$(EXEC)_server
+
+FOLDERENTREGA=$(EXEC)-diogo-e-fernando
+PACOTENAME=$(FOLDERENTREGA).tar.gz
+
 CC = g++
 
-$(EXEC): $(BINDIR) $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXEC)
+include Make.objects
 
+$(EXEC): $(EXEC_CLIENT) $(EXEC_SERVER)
+
+$(EXEC_CLIENT): $(BINDIR) $(OBJECTS) $(BINDIR)/main_client.o
+	$(CC) $(CFLAGS) $(OBJECTS) $(BINDIR)/main_client.o -o $(EXEC_CLIENT)
+
+$(EXEC_SERVER): $(BINDIR) $(OBJECTS) $(BINDIR)/main_server.o
+	$(CC) $(CFLAGS) $(OBJECTS) $(BINDIR)/main_server.o -o $(EXEC_SERVER)
 
 # OBJECTS
 
-$(BINDIR)/graph.o: $(BINDIR) $(SRCDIR)/graph.cc $(SRCDIR)/graph.h $(SRCDIR)/utils.h
-	$(CC) $(CFLAGS) -c $(SRCDIR)/graph.cc -o $(BINDIR)/graph.o
-
-$(BINDIR)/main.o: $(BINDIR) $(SRCDIR)/main.cc $(SRCDIR)/utils.h
-	$(CC) $(CFLAGS) -c $(SRCDIR)/main.cc -o $(BINDIR)/main.o
-
+include Make.dependencies
 
 
 #
@@ -39,13 +45,29 @@ $(RELATORIODIR):
 pdf: $(RELATORIODIR)
 	cd $(RELATORIODIR); make folderup
 
-entrega: $(EXEC) pdf
-	echo "vamos entregar entao"
+deps:
+	./geraObj.sh
+
+entrega: clean $(EXEC) pdf
+	rm -f $(PACOTENAME)
+	rm -rf $(FOLDERENTREGA)
+	mkdir $(FOLDERENTREGA)
+	cp -r src $(FOLDERENTREGA)
+	cp README $(FOLDERENTREGA)
+	cp relatorio.pdf $(FOLDERENTREGA)
+	cp Makefile $(FOLDERENTREGA)
+	cp Make.dependencies $(FOLDERENTREGA)
+	cp Make.objects $(FOLDERENTREGA)
+	tar -czf $(PACOTENAME) $(FOLDERENTREGA)
+	rm -rf $(FOLDERENTREGA)
+	echo "Vamos entregar entao"
 
 .PHONY: clean
 clean:
 	rm -f $(BINDIR)/*
 	rm -f *~
 	rm -f $(SRCDIR)/*~
-	rm -f $(EXEC)
+	rm -f $(EXEC_CLIENT)
+	rm -f $(EXEC_SERVER)
+	rm -f $(PACOTENAME)
 	cd $(RELATORIODIR); make clean
