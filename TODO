@@ -7,3 +7,27 @@ Implementar 2 algoritmos de roteamento.
 
 * imprimir todas as trocas de mensagens entre roteadores
 * fazer o promptzinho
+
+
+POSSIVEIS TIPOS DE MENSAGEM
+
+* PING
+    Mensagem mandada para descobrir o atraso de resposta. Será tratada
+     para devolver PONG. 
+* PONG
+    Resposta da mensagem anterior. Com o tempo entre essas duas mensagens
+     deverá ser "calculado" (simulado, pois já temos esse valor) do tempo
+     de atraso entre um roteador e seu vizinho.
+* TIMEOUT
+    Resposta ficticia que representa um timeout (não precisamos ficar
+     esperando infinitamente né? Se sabemos que um router não vai
+     responder a outro diretamente, não precisamos ficar esperando)
+* REQUEST
+    Alguma requisição. O corpo da mensagem vai conter a requisição.
+     A única possível requisição que penso até agora é NEIGHBOR
+* NEIGHBOR
+    Resposta a requisição NEIGHBOR. O corpo da mensagem é uma string que
+     deve ser parseada em um vetor de tempo de atraso entre aquele
+     roteador e seus vizinhos.
+
+Haverá mais (para o segundo algoritmo)
