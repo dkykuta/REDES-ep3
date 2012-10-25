@@ -35,10 +35,11 @@ def Execute(argList):
 
     adjMatrix = Utils.parse_network_topology_file(tFile)
 
-    r1 = Router('Router 1')
-    r2 = Router('Router 2')
+    r1 = Router(1)
+    r2 = Router(2)
     skynet.addRouter(r1)
     skynet.addRouter(r2)
+    skynet.receiveBroadcastRequest(r1)
 
 
     return
