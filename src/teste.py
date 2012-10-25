@@ -1,0 +1,2 @@
+def alo():
+    print "ALOOOO"
