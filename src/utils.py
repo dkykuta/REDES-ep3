@@ -7,9 +7,9 @@ def parse_network_topology_file(fileName):
     
     matrix = []
     for s in lines:
-        row = s.split()
-        if len(row) > 0:
-            matrix.append( s.split() )
+        row = [ float(elem) for elem in s.split() ]
+        if row:
+            matrix.append(row)
     
     return matrix, len(matrix[0])
     
