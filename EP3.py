@@ -12,12 +12,10 @@
 #
 ########################################################
 import sys
-from src.router import *
-from src.interwebz import *
+from src.router import Router
+from src.interwebz import Interwebz
 import src.utils as Utils
 
-#TODO:
-#  YO HARUKI!  Coloque aqui código que você quer que fique neste arquivo
 
 ########################################################
 def Execute(argList):
@@ -28,21 +26,18 @@ def Execute(argList):
 
     argFile = argList[0] # Network Topology File Name
     
-    #TODO: implemente aqui o código pra executar o programa de fato
     skynet = Interwebz()
 
-    tFile = open(argFile)
-
-    adjMatrix = Utils.parse_network_topology_file(tFile)
+    adjMatrix, numRouters = Utils.parse_network_topology_file(argFile)
 
     r1 = None
-    for i in range(4):
+    for i in xrange(numRouters):
         r = Router(i)
         if i == 2:
             r1 = r
         skynet.addRouter(r)
 
-    skynet.setNetStat([[-1, 1, -1, 3], [0, -1, -1, 3], [-1, 1, -1, 3], [0, -1, 2, -1]])
+    skynet.setNetStat(adjMatrix)
     skynet.doBroadcast(r)
     skynet.doBroadcast(r1)
 

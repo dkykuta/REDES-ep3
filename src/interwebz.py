@@ -1,8 +1,10 @@
-from message import *
+from message import Message
 
 class Interwebz:
     def __init__(self):
         self.routers = []
+        self.network = []
+        self.numRouters = 0
 
     def setNetStat(self, network):
         self.network = network
@@ -10,12 +12,12 @@ class Interwebz:
 
     def addRouter(self, router):
         self.routers.append(router)
-        print "Jetzt haben wir", len(self.routers), "routers"
+        print "Jetzt haben wir %s routers" % ( len(self.routers) )
 
-    def getNeighbor(self, router):
-        return [x for x in range(self.numRouters) if self.network[router.number][x] != -1]
+    def getNeighbour(self, router):
+        return [x for x in xrange(self.numRouters) if self.network[router.number][x] != -1]
 
     def doBroadcast(self, requester):
-        print "Router", requester.number, "requested a broadcast"
-        for i in self.getNeighbor(requester):
+        print "%s requested a broadcast" % ( requester )
+        for i in self.getNeighbour(requester):
             self.routers[i].receiveMessage(Message(requester.number, "alo"*(requester.number+1)))
