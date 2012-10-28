@@ -12,18 +12,19 @@ class Interwebz:
 
     def initialize(self, network, numRouters):
         self.setNetStat(network, numRouters)
+
         for r in self.routers:
             r.initializeStep1()
+        
         for r in self.routers:
             r.initializeStep2()
-        print "\n\n\n"
+
         for r in self.routers:
-            print r.networkStat
+            r.dijkstra()
 
 
     def addRouter(self, router):
         self.routers.append(router)
-        print "Jetzt haben wir %s routers" % ( len(self.routers) )
 
     def getDelay(self, routerFrom, routerTo):
         return self.network[routerFrom][routerTo]
@@ -33,7 +34,7 @@ class Interwebz:
 
     def send(self, frm, target, msg):
         if self.network[frm][target] == -1:
-            print "Hey, this two routers is not directly connected."
+            print "Hey, these two routers is not directly connected."
         else:
             self.routers[target].receiveMessage(msg)
 

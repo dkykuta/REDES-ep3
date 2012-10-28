@@ -1,10 +1,19 @@
 from message import Message
 
+MAX_COST=1e100
+
 class Router:
     def __init__(self, number, interwebz):
         self.number = number
         self.connection = interwebz
         self.networkStat = {}
+        self.dijkstraDelayCosts = []
+        self.dijkstraDelayPaths = []
+        self.dijkstraHopsCosts = []
+        self.dijkstraHopsPaths = []
+
+    def __str__(self): return "Router #%s" % self.number
+    def __repr__(self): return self.__str__()
 
     def printName(self):
         print "Mein Name ist Router #%s" % self.number
@@ -61,6 +70,68 @@ class Router:
 
     def initializeStep2(self):
         self.broadcast(self.createNeighborMessage())
-        
-    def __str__(self): return "Router #%s" % self.number
-    def __repr__(self): return self.__str__()
+
+    def dijkstra(self):
+        matrizComPesos = []
+        matrizSemPesos = []
+
+        numR = len(self.networkStat)
+
+        for i in xrange(numR):
+            matrizComPesos.append([-1] * numR)
+            matrizSemPesos.append([-1] * numR)
+
+        for routerN in self.networkStat.keys():
+            neighborhood = self.networkStat[routerN]
+            for neighbor in neighborhood.keys():
+                matrizComPesos[routerN][neighbor] = neighborhood[neighbor]
+                matrizSemPesos[routerN][neighbor] = 1
+
+        self.dijkstraDelayPaths, self.dijkstraDelayCosts = self.dijkstraC(matrizComPesos, numR)
+        self.dijkstraHopsPaths, self.dijkstraHopsCosts = self.dijkstraC(matrizSemPesos, numR)
+
+    def dijkstraC(self, adjM, numRouters):
+        pre = range(numRouters)
+        custosAtuais = [MAX_COST]*numRouters
+
+        N = [self.number]
+
+        for i in xrange(numRouters):
+            if adjM[self.number][i] != -1:
+                custosAtuais[i] = adjM[self.number][i]
+                pre[i] = self.number
+
+        while True:
+            minV = -1
+            minC = MAX_COST
+            for i in xrange(numRouters):
+                if custosAtuais[i] < minC and i not in N:
+                    minV = i
+                    minC = custosAtuais[i]
+            if minV == -1:
+                break
+
+            N.append(minV)
+            for i in xrange(numRouters):
+                if adjM[minV][i] != -1:
+                    if minC + adjM[minV][i] < custosAtuais[i]:
+                        custosAtuais[i] = minC + adjM[minV][i]
+                        pre[i] = minV
+
+        bestPaths = []
+        bestCosts = []
+        for i in xrange(numRouters):
+            pathToI = [i]
+            j = i
+            cost = 0
+            while pre[j] != self.number:
+                pathToI.insert(0, pre[j])
+                j = pre[j]
+                cost = cost + adjM[pre[j]][j]
+            pathToI.insert(0, pre[j])
+            cost = cost + adjM[pre[j]][j]
+
+            bestPaths.append(pathToI)
+            bestCosts.append(cost)
+
+        return bestPaths, bestCosts
