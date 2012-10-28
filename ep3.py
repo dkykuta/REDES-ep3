@@ -30,9 +30,6 @@ def Execute(argList):
 
     adjMatrix, numRouters = Utils.parse_network_topology_file(argFile)
 
-    for i in xrange(numRouters):
-        skynet.addRouter(Router(i, skynet))
-
     skynet.initialize(adjMatrix, numRouters)
 
     # prompt
