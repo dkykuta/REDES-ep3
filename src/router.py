@@ -99,7 +99,7 @@ class Router:
         pre = range(numRouters)
         custosAtuais = [MAX_COST]*numRouters
 
-        N = [self.number]
+        N = [True] * numRouters
 
         for i in xrange(numRouters):
             if adjM[self.number][i] != -1:
@@ -110,13 +110,13 @@ class Router:
             minV = -1
             minC = MAX_COST
             for i in xrange(numRouters):
-                if custosAtuais[i] < minC and i not in N:
+                if custosAtuais[i] < minC and N[i]:
                     minV = i
                     minC = custosAtuais[i]
             if minV == -1:
                 break
 
-            N.append(minV)
+            N[minV] = False
             for i in xrange(numRouters):
                 if adjM[minV][i] != -1:
                     if minC + adjM[minV][i] < custosAtuais[i]:
