@@ -12,6 +12,11 @@ class Router:
         self.dijkstraHopsCosts = []
         self.dijkstraHopsPaths = []
 
+        self.bellmanfordDelayCosts = []
+        self.bellmanfordDelayPaths = []
+        self.bellmanfordHopsCosts = []
+        self.bellmanfordHopsPaths = []
+
     def __str__(self): return "Router #%s" % self.number
     def __repr__(self): return self.__str__()
 
