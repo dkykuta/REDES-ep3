@@ -6,12 +6,14 @@ class Router:
     def __init__(self, number, interwebz):
         self.number = number
         self.connection = interwebz
+
         self.networkStat = {}
         self.dijkstraDelayCosts = []
         self.dijkstraDelayPaths = []
         self.dijkstraHopsCosts = []
         self.dijkstraHopsPaths = []
 
+        self.distances = {}
         self.bellmanfordDelayCosts = []
         self.bellmanfordDelayPaths = []
         self.bellmanfordHopsCosts = []
@@ -49,8 +51,14 @@ class Router:
     def createPongMessage(self, pingMessage):
         return self.createMessage(pingMessage.sender, "PONG", self.connection.getDelay(pingMessage.sender, self.number))
 
+    def createPongBFMessage(self, pingMessage):
+        return self.createMessage(pingMessage.sender, "PONG_BF", self.connection.getDelay(pingMessage.sender, self.number))
+
     def createPingMessage(self):
         return self.createMessage("*", "PING", "")
+
+    def createPingBFMessage(self):
+        return self.createMessage("*", "PING_BF", "")
 
     def createRequestMessage(self, to, request):
         return self.createMessage(to, "REQUEST", "")
@@ -127,24 +135,26 @@ class Router:
             N[minV] = False
             for i in xrange(numRouters):
                 if adjM[minV][i] != -1:
-                    if minC + adjM[minV][i] < custosAtuais[i]:
-                        custosAtuais[i] = minC + adjM[minV][i]
+                    if custosAtuais[minV] + adjM[minV][i] < custosAtuais[i]:
+                        custosAtuais[i] = custosAtuais[minV] + adjM[minV][i]
                         pre[i] = minV
 
         bestPaths = []
-        bestCosts = []
         for i in xrange(numRouters):
             pathToI = [i]
             j = i
-            cost = 0
             while pre[j] != self.number:
                 pathToI.insert(0, pre[j])
                 j = pre[j]
-                cost = cost + adjM[pre[j]][j]
             pathToI.insert(0, pre[j])
-            cost = cost + adjM[pre[j]][j]
 
             bestPaths.append(pathToI)
-            bestCosts.append(cost)
 
-        return bestPaths, bestCosts
+        return bestPaths, custosAtuais
+
+    
+    def bellmanFordStep(self):
+        if not self.connection.hasMessage(self.number):
+            if self.distances != {}:
+                return False
+            self.broadcast(self.createPingBFMessage())
