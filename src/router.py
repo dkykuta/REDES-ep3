@@ -24,9 +24,6 @@ class Router:
     def __str__(self): return "Router #%s" % self.number
     def __repr__(self): return self.__str__()
 
-    def printName(self):
-        print "Mein Name ist Router #%s" % self.number
-
     def receiveMessage(self):
         msg = self.connection.getMessage(self.number)
         print "[%s] received %s" % (self, msg)
@@ -77,14 +74,10 @@ class Router:
     def createPingBFMessage(self):
         return self.createMessage("*", "PING_BF", "")
 
-    def createRequestMessage(self, to, request):
-        return self.createMessage(to, "REQUEST", "")
-
     def createNeighborMessage(self):
         return self.createMessage("*", "NEIGHBOR", self.networkStat[self.number])
 
     def createDistanceMessage(self, to):
-        print "Distances from %d: %s" % (self.number, self.distances)
         return self.createMessage(to, "DISTANCE", self.distances)
 
     def createMessage(self, to, msgType, msg):
@@ -184,9 +177,6 @@ class Router:
             self.broadcast(self.createPingBFMessage())
             while self.connection.hasMessage(self.number):
                 self.receiveMessage()
-            print "~~~~~~~~~~~~~"
-            print self.distances
-            print "~~~~~~~~~~~~~"
             if not pesos:
                 for key in self.distances.keys():
                     self.distances[key] = 1

@@ -1,3 +1,104 @@
-We got this.
++-------------------------------------------------+
+| Diogo Haruki Kykuta         nUSP 6879613        |   
+| Fernando Omar Aluani        nUSP 6797226        |   
++-------------------------------------------------+
+| We got this                                     |   
++-------------------------------------------------+
 
-----
+Não é necessário compilar para executar. Trata-se um script python
+
+Para executar, basta rodar './ep3 <arquivo de topologia da rede>'
+
+SOBRE O NUMERO DE HOPS:
+    Estávamos meio incertos sobre como deveria ser calculado
+    esse modo "hop". Assumimos que seria calcular o menor caminho de novo,
+    sem contar o atraso (como se cada aresta existente tivesse peso 1).
+
+    Assim, pode ser que em atraso o resultado obtido seja 1 - 4 - 2 - 3
+    e o resultado em hops seja 1 - 5 - 3
+
+    Além disso, na impressão, contamos o número de ligações entre 2
+    roteadores. Ou seja, no caminho 1 - 5 - 3, contamos 2 hops e no
+    caminho 1 - 4 - 2 - 3 contamos 3 hops.
+
+SOBRE AS MENSAGENS:
+    As mensagens são constituidas de 5 informações:
+        * quem criou a mensagem (sender)
+        * quem deve receber a mensagem (to)
+        * o tipo de mensagem (será explicado mais adiante)
+        * o corpo da mensagem (que depende do tipo de mensagem)
+        * por quem ela ja passou
+
+    Essa anotação de origem e destino da mensagem se deve a forma
+     como simulamos o envio pela rede. Caso queiramos enviar uma mensagem
+     para um roteador que não estamos conectados, enviamos para os outros
+     e estes, ao verem que 'to' não corresponde a si mesmos, repassam
+     a mensagem.
+
+    O path serve para evitar broadcasts em ciclos. Assim, uma mensagem só
+     é mandada para aqueles por quem ela ainda não passou
+
+    msgType pode ser:
+        * PING / PING_BF / PING_BF_HOP
+      São mensagens de ping, usadas para descobrir o atraso com os
+       roteadores diretamente ligados. Essa diferenciação de pings ocorre
+       para tratarmos separadamente o caso pré-processamento de Dijkstra,
+       execução inicial de Bellman-Ford para atrasos e para hops.
+
+        * PONG / PONG_BF / PONG_BF_HOP
+      São as respostas aos pings acima. Todas são iguais exceto pelo tipo,
+       que será usado para determinar a ação que deve ser realizada.
+       O corpo da mensagem nessas mensagens é um float, correspondente ao
+       tempo de atraso entre aqueles 2 roteadores.
+
+        * NEIGHBOR
+      Durante o pré-processamento para Dijkstra, após todos os roteadores
+       descobrirem quem são seus vizinhos e o delay entre eles, eles
+       solicitam um broadcast (um broadcast mesmo, que será repassado por
+       seus vizinhos até atingir todo mundo - para isso usamos o path
+       em mensagem) com a sua lista de vizinhos.
+       O corpo da mensagem desse tipo de mensagem é um dicionário (um mapa)
+       onde cada chave representa o número de um roteador e o valor o seu
+       atraso.
+
+        * DISTANCE
+      Quase a mesma coisa que acima, mas só é repassado para os vizinhos
+       diretos.
+
+SOBRE OS ALGORITMOS:
+    Dijkstra:
+        Temos um pré-processamento para descobrir toda a situação da rede.
+        Assim, ao final dele, cada vértice conhece todas as ligações
+        existentes. A partir daí, executamos Dijkstra em cada vértice.
+
+    Bellman-Ford:
+        O algoritmo é executado da seguinte maneira:
+        
+        Todos os roteadores inicializam seus DVs e os repassam para seus
+          vizinhos.
+    
+        Todo roteador usa os DVs que recebeu para tentar atualizar seu DV
+        Caso consiga, ele envia seu DV para os vizinhos.
+
+        Quando, em uma iteração, nenhum roteador enviar seu DV, paramos
+        o loop e estamos com as tabelas prontas.
+
+
+
+        Obs: Nesse algoritmo, construimos um vetor parent em cada roteador
+        Que represente "o roteador para o qual devo mandar a mensagem caso
+        queira me comunicar com o roteador y". Em outras palavras, é o
+        próximo roteador da sequência.
+            Em interwebz, temos uma função que constroi o caminho
+        e o marca em cada roteador. Isso pode parecer roubado, mas é
+        feito somente ao final de todo o processo e apenas para facilitar
+        a impressão quando liberarmos o prompt.
+
+
+SOBRE O PROMPT:
+    <vd/ee> <roteador de origem> <roteador destino> <h/a>
+
+    vd: vai mostrar os resultados de Bellman ford
+    ee: vai mostrar os resultados de Dijkstra
+    h: pelo número de hops
+    a: pelo atraso na comunicação
