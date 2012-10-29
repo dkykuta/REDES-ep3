@@ -42,6 +42,21 @@ class Interwebz:
             r.dijkstra()
 
 
+        continueProcess = True
+        while continueProcess:
+            continueProcess = False
+            for r in self.routers:
+                if r.bellmanFordStep():
+                    continueProcess = True
+
+        for r in self.routers:
+            v = []
+            for i in xrange(self.numRouters):
+                v.append(self.getBellmanFordDelayPath(r.number, i))
+            r.bellmanfordDelayPaths = v
+            r.bellmanfordDelayCosts = r.distances
+
+
     def addRouter(self, router):
         self.routers.append(router)
         self.messages[router.number] = []
@@ -59,6 +74,7 @@ class Interwebz:
         return [x for x in xrange(self.numRouters) if self.network[routerNumber][x] != -1]
 
     def send(self, frm, target, msg):
+        print "Message from Router #%d to Router #%d" % (frm, target)
         if self.network[frm][target] == -1:
             print "Hey, these two routers is not directly connected."
         else:
@@ -69,3 +85,13 @@ class Interwebz:
         print "Router #%d requested a broadcast" % ( requester )
         for i in self.getNeighbour(requester):
             self.send(requester, i, msg)
+
+    def getBellmanFordDelayPath(self, frm, to):
+        path = []
+        router = self.routers[frm]
+        while router.number != to:
+            path.append(router.number)
+            router = self.routers[router.parent[to]]
+        path.append(router.number)
+        return path
+

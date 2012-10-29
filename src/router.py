@@ -14,6 +14,8 @@ class Router:
         self.dijkstraHopsPaths = []
 
         self.distances = {}
+        self.parent = {}
+        self.neighborhood = []
         self.bellmanfordDelayCosts = []
         self.bellmanfordDelayPaths = []
         self.bellmanfordHopsCosts = []
@@ -31,9 +33,16 @@ class Router:
         if msg.msgType == "PING":
             newmsg = self.createPongMessage(msg)
             self.connection.send(self.number, newmsg.to, newmsg)
-            return
+            return msg
+        if msg.msgType == "PING_BF":
+            newmsg = self.createPongBFMessage(msg)
+            self.connection.send(self.number, newmsg.to, newmsg)
+            return msg
         if msg.msgType == "NEIGHBOR":
             self.networkStat[msg.sender] = msg.msg
+
+        if msg.msgType == "DISTANCE":
+            return msg
 
         if msg.to == self.number:
             # hey, this message is for me!
@@ -41,12 +50,19 @@ class Router:
                 if self.number not in self.networkStat:
                     self.networkStat[self.number] = {}
                 self.networkStat[self.number][msg.sender] = msg.msg
+            if msg.msgType == "PONG_BF":
+                self.distances[msg.sender] = msg.msg
+                self.parent[msg.sender] = msg.sender
+                if msg.sender not in self.neighborhood:
+                    self.neighborhood.append(msg.sender)
         else:
             msg.addToPath(self.number)
             links = self.networkStat[self.number]
             for link in links:
                 if link not in msg.path:
                     self.connection.send(self.number, link, msg)
+
+        return msg
 
     def createPongMessage(self, pingMessage):
         return self.createMessage(pingMessage.sender, "PONG", self.connection.getDelay(pingMessage.sender, self.number))
@@ -65,6 +81,9 @@ class Router:
 
     def createNeighborMessage(self):
         return self.createMessage("*", "NEIGHBOR", self.networkStat[self.number])
+
+    def createDistanceMessage(self, to):
+        return self.createMessage(to, "DISTANCE", self.distances)
 
     def createMessage(self, to, msgType, msg):
         m = Message(self.number, to, msgType, msg)
@@ -152,9 +171,37 @@ class Router:
 
         return bestPaths, custosAtuais
 
+
+    def sendDistanceToNeighbor(self):
+        for neighbor in self.neighborhood:
+            self.connection.send(self.number, neighbor, self.createDistanceMessage(neighbor))
+
     
     def bellmanFordStep(self):
-        if not self.connection.hasMessage(self.number):
-            if self.distances != {}:
-                return False
+        if self.distances == {}:
             self.broadcast(self.createPingBFMessage())
+            while self.connection.hasMessage(self.number):
+                self.receiveMessage()
+            self.sendDistanceToNeighbor()
+            return True
+        else:
+            retVal = False
+            while self.connection.hasMessage(self.number):
+                msg = self.receiveMessage()
+                if msg.msgType != "DISTANCE":
+                    continue
+                distanceV, vFrom = msg.msg, msg.sender
+                for router in distanceV.keys():
+                    if not self.distances.has_key(router):
+                        self.distances[router] = distanceV[router] + self.distances[vFrom]
+                        self.parent[router] = vFrom
+                        retVal = True
+                    else:
+                        d = distanceV[router] + self.distances[vFrom]
+                        if d < self.distances[router]:
+                            self.distances[router] = d
+                            self.parent[router] = vFrom
+                            retVal = True
+            if retVal:
+                self.sendDistanceToNeighbor()
+            return retVal
