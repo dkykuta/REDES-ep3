@@ -12,5 +12,5 @@ class Message:
             self.path.append(newElem)
         
     def __str__(self):
-        return "Message (from %s to %s):\n [Type: %s] %s" % (self.sender, self.to, self.msgType, self.msg)
+        return "(origin %s target %s):\n [Type: %s] %s" % (self.sender, self.to, self.msgType, self.msg)
     def __repr__(self): return self.__str__()

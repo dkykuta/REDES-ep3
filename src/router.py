@@ -23,7 +23,8 @@ class Router:
     def printName(self):
         print "Mein Name ist Router #%s" % self.number
 
-    def receiveMessage(self, msg):
+    def receiveMessage(self):
+        msg = self.connection.getMessage(self.number)
         print "[%s] received %s" % (self, msg)
         if msg.msgType == "PING":
             newmsg = self.createPongMessage(msg)
@@ -75,6 +76,13 @@ class Router:
 
     def initializeStep2(self):
         self.broadcast(self.createNeighborMessage())
+
+    def processIncomingMessages(self):
+        if not self.connection.hasMessage(self.number):
+            return False
+        while self.connection.hasMessage(self.number):
+            self.receiveMessage()
+        return True 
 
     def dijkstra(self):
         matrizComPesos = []
