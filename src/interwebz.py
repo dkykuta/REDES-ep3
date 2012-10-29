@@ -46,15 +46,36 @@ class Interwebz:
         while continueProcess:
             continueProcess = False
             for r in self.routers:
-                if r.bellmanFordStep():
+                if r.bellmanFordStep(True): #delay
                     continueProcess = True
 
         for r in self.routers:
             v = []
             for i in xrange(self.numRouters):
-                v.append(self.getBellmanFordDelayPath(r.number, i))
+                v.append(self.getBellmanFordPath(r.number, i))
             r.bellmanfordDelayPaths = v
             r.bellmanfordDelayCosts = r.distances
+
+        print "-------------------------"
+        print "-------------------------"
+        print "-------------------------"
+        # rodando mesma coisa, mas para hops
+        for r in self.routers:
+            r.distances = {}
+            r.parent = {}
+        continueProcess = True
+        while continueProcess:
+            continueProcess = False
+            for r in self.routers:
+                if r.bellmanFordStep(False): #hops
+                    continueProcess = True
+
+        for r in self.routers:
+            v = []
+            for i in xrange(self.numRouters):
+                v.append(self.getBellmanFordPath(r.number, i))
+            r.bellmanfordHopsPaths = v
+            r.bellmanfordHopsCosts = r.distances
 
 
     def addRouter(self, router):
@@ -86,7 +107,7 @@ class Interwebz:
         for i in self.getNeighbour(requester):
             self.send(requester, i, msg)
 
-    def getBellmanFordDelayPath(self, frm, to):
+    def getBellmanFordPath(self, frm, to):
         path = []
         router = self.routers[frm]
         while router.number != to:

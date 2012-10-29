@@ -51,8 +51,9 @@ class Router:
                     self.networkStat[self.number] = {}
                 self.networkStat[self.number][msg.sender] = msg.msg
             if msg.msgType == "PONG_BF":
-                self.distances[msg.sender] = msg.msg
-                self.parent[msg.sender] = msg.sender
+                if not self.distances.has_key(msg.sender):
+                    self.distances[msg.sender] = msg.msg
+                    self.parent[msg.sender] = msg.sender
                 if msg.sender not in self.neighborhood:
                     self.neighborhood.append(msg.sender)
         else:
@@ -83,6 +84,7 @@ class Router:
         return self.createMessage("*", "NEIGHBOR", self.networkStat[self.number])
 
     def createDistanceMessage(self, to):
+        print "Distances from %d: %s" % (self.number, self.distances)
         return self.createMessage(to, "DISTANCE", self.distances)
 
     def createMessage(self, to, msgType, msg):
@@ -177,11 +179,17 @@ class Router:
             self.connection.send(self.number, neighbor, self.createDistanceMessage(neighbor))
 
     
-    def bellmanFordStep(self):
+    def bellmanFordStep(self, pesos):
         if self.distances == {}:
             self.broadcast(self.createPingBFMessage())
             while self.connection.hasMessage(self.number):
                 self.receiveMessage()
+            print "~~~~~~~~~~~~~"
+            print self.distances
+            print "~~~~~~~~~~~~~"
+            if not pesos:
+                for key in self.distances.keys():
+                    self.distances[key] = 1
             self.sendDistanceToNeighbor()
             return True
         else:
